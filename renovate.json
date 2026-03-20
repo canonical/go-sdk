@@ -4,13 +4,12 @@
     "config:recommended"
   ],
   "enabledManagers": [
-    "regex"
+    "custom.regex"
   ],
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": [
-        "^VERSION$"
-      ],
+      "customType": "regex",
+      "managerFilePatterns": ["/^VERSION$/"],
       "matchStrings": [
         "(?<currentValue>[0-9.]+)"
       ],
@@ -19,28 +18,25 @@
       "versioningTemplate": "semver"
     }
   ],
-  "baseBranches": [
+  "baseBranchPatterns": [
     "1.24",
     "1.25",
     "1.26"
   ],
   "packageRules": [
     {
-      "baseBranches": [
-        "1.24"
-      ],
+      "matchPackageNames": ["go"],
+      "baseBranchPatterns": ["1.24"],
       "allowedVersions": "/^1\\.24\\./"
     },
     {
-      "baseBranches": [
-        "1.25"
-      ],
+      "matchPackageNames": ["go"],
+      "baseBranchPatterns": ["1.25"],
       "allowedVersions": "/^1\\.25\\./"
     },
     {
-      "baseBranches": [
-        "1.26"
-      ],
+      "matchPackageNames": ["go"],
+      "baseBranchPatterns": ["1.26"],
       "allowedVersions": "/^1\\.26\\./"
     }
   ]
