@@ -1,0 +1,6 @@
+if [[ -f "$SDK_STATE_DIR"/env-vars ]]; then
+    while IFS='=' read -r key value; do
+        echo "Restoring Go environment variable: $key=$value"
+        sudo -iu workshop go env -w "$key=$value"
+    done < "$SDK_STATE_DIR"/env-vars
+fi

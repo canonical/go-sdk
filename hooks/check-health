@@ -1,0 +1,5 @@
+if sudo -iu workshop -- go version; then
+  workshopctl set-health okay
+else
+  workshopctl set-health --code=go-version-failed error "Go version check failed"
+fi

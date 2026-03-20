@@ -1,0 +1,4 @@
+# Remove all single quotes.
+# `go env -w $k=$v` wraps values in double quotes automatically,
+# so passing a value already wrapped in quotes (e.g. "'off'") results in nested quotes and an error.
+sudo -iu workshop go env -changed | sed "s/='\(.*\)'/=\1/" | tee "$SDK_STATE_DIR"/env-vars

@@ -1,0 +1,6 @@
+cat <<EOF >/etc/profile.d/go.sh
+export PATH="$SDK/bin:\$PATH"
+EOF
+
+cache=/home/workshop/go/pkg/mod
+sudo -iu workshop -- go env -w GOMODCACHE="$cache"

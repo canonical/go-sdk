@@ -1,0 +1,52 @@
+name: Build and Upload SDK
+
+on:
+  push:
+    branches:
+      - "[0-9]+.[0-9]+"
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch name (e.g., 1.24)"
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-upload:
+    runs-on:
+      - self-hosted
+      - linux
+      - jammy
+      - x64
+      - xlarge
+    strategy:
+      matrix:
+        platform: [amd64, arm64, riscv64]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
+
+      - name: Install sdkcraft
+        run: sudo snap install sdkcraft --edge --classic
+
+      - name: Extract version from branch name
+        run: |
+          if [ -n "${{ github.event.inputs.branch }}" ]; then
+            VERSION="${{ github.event.inputs.branch }}"
+          else
+            VERSION="${GITHUB_REF#refs/heads/}"
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Pack SDK for ${{ matrix.platform }}
+        run: sdkcraft pack --build-for ${{ matrix.platform }}
+
+      - name: Upload SDK for ${{ matrix.platform }}
+        env:
+          SDKCRAFT_STORE_CREDENTIALS: ${{ secrets.SDKCRAFT_STORE_CREDENTIALS_STAGING }}
+        run: sdkcraft upload *.sdk --release ${{ env.VERSION }}/edge
