@@ -26,17 +26,17 @@
   "packageRules": [
     {
       "matchPackageNames": ["go"],
-      "baseBranchPatterns": ["1.24"],
+      "matchBaseBranches": ["1.24"],
       "allowedVersions": "/^1\\.24\\./"
     },
     {
       "matchPackageNames": ["go"],
-      "baseBranchPatterns": ["1.25"],
+      "matchBaseBranches": ["1.25"],
       "allowedVersions": "/^1\\.25\\./"
     },
     {
       "matchPackageNames": ["go"],
-      "baseBranchPatterns": ["1.26"],
+      "matchBaseBranches": ["1.26"],
       "allowedVersions": "/^1\\.26\\./"
     }
   ]
