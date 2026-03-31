@@ -16,7 +16,7 @@ name: go-app
 base: ubuntu@24.04
 sdks:
   - name: go
-    channel: all/edge
+    channel: 1.24/stable
 
 actions:
   build: |
