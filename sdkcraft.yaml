@@ -56,4 +56,4 @@ parts:
       craftctl set version="$VERSION"
       curl -fLO "https://go.dev/dl/go${VERSION}.linux-${CRAFT_ARCH_BUILD_FOR}.tar.gz"
       mkdir -p "$CRAFT_PART_INSTALL"
-      tar -xzf "go${VERSION}.linux-${CRAFT_ARCH_BUILD_FOR}.tar.gz" -C "$CRAFT_PART_INSTALL"
+      tar -xzf "go${VERSION}.linux-${CRAFT_ARCH_BUILD_FOR}.tar.gz" --strip-components=1 -C "$CRAFT_PART_INSTALL"
