@@ -4,3 +4,4 @@ EOF
 
 cache=/home/workshop/go/pkg/mod
 sudo -iu workshop -- go env -w GOMODCACHE="$cache"
+sudo -iu workshop -- go env -w GOTOOLCHAIN=local
