@@ -1,0 +1,18 @@
+summary: Launch a workshop with the go SDK and verify setup
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  workshop exec -- bash -lc 'go version' | MATCH "go[0-9]+\.[0-9]+"
+  workshop exec -- bash -lc 'go env GOMODCACHE' | MATCH "/home/workshop/go/pkg/mod"
+  workshop exec -- bash -lc 'go env GOTOOLCHAIN' | MATCH "local"
+  workshop exec -- bash -lc 'command -v go'
+
+debug: |
+  workshop exec -- bash -lc 'echo PATH=$PATH' || true
+  workshop exec -- bash -lc 'go env' || true

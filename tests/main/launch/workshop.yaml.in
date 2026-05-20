@@ -1,0 +1,4 @@
+name: test-go
+base: ${BASE}
+sdks:
+  - name: try-go

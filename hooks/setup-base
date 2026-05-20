@@ -1,5 +1,5 @@
 cat <<EOF >/etc/profile.d/go.sh
-export PATH="$SDK/bin:\$PATH"
+export PATH="/home/workshop/go/bin:$SDK/bin:\$PATH"
 EOF
 
 cache=/home/workshop/go/pkg/mod
