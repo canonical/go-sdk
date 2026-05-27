@@ -1,0 +1,142 @@
+summary: Compile, test, and run a multi-package Go program with an external dependency
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  # A "slightly complex" Go program that exercises the toolchain:
+  #   * external module (github.com/google/uuid) → hits GOMODCACHE
+  #   * sub-package import → exercises module path resolution
+  #   * goroutines + channels + sync → exercises the runtime
+  #   * unit test → exercises `go test`
+  #   * built binary → exercises `go build` + linker
+  #
+  # Each source file is written via a `bash -c` heredoc inside the
+  # workshop. The heredoc terminator must sit on its own line, so the
+  # closing `"` of the `bash -c` argument is placed on a separate line.
+
+  workshop exec -- bash -c "mkdir -p /home/workshop/app/parallel"
+
+  workshop exec -- bash -c "cat > /home/workshop/app/go.mod <<'MOD'
+  module example.com/spread-app
+
+  go 1.21
+
+  require github.com/google/uuid v1.6.0
+  MOD
+  "
+
+  workshop exec -- bash -c "cat > /home/workshop/app/main.go <<'MAIN'
+  package main
+
+  import (
+  	\"fmt\"
+  	\"os\"
+
+  	\"example.com/spread-app/parallel\"
+  )
+
+  func main() {
+  	const workers = 8
+  	const total = 16
+  	ids := parallel.GenerateIDs(workers, total)
+  	if len(ids) != total {
+  		fmt.Fprintf(os.Stderr, \"expected %d ids, got %d\n\", total, len(ids))
+  		os.Exit(1)
+  	}
+  	for _, id := range ids {
+  		fmt.Println(id)
+  	}
+  }
+  MAIN
+  "
+
+  workshop exec -- bash -c "cat > /home/workshop/app/parallel/parallel.go <<'PKG'
+  package parallel
+
+  import (
+  	\"sync\"
+
+  	\"github.com/google/uuid\"
+  )
+
+  func GenerateIDs(workers, n int) []string {
+  	results := make([]string, n)
+  	jobs := make(chan int, n)
+  	var wg sync.WaitGroup
+
+  	for w := 0; w < workers; w++ {
+  		wg.Add(1)
+  		go func() {
+  			defer wg.Done()
+  			for i := range jobs {
+  				results[i] = uuid.NewString()
+  			}
+  		}()
+  	}
+
+  	for i := 0; i < n; i++ {
+  		jobs <- i
+  	}
+  	close(jobs)
+  	wg.Wait()
+
+  	return results
+  }
+  PKG
+  "
+
+  workshop exec -- bash -c "cat > /home/workshop/app/parallel/parallel_test.go <<'TEST'
+  package parallel
+
+  import \"testing\"
+
+  func TestGenerateIDsAreUnique(t *testing.T) {
+  	const workers = 4
+  	const n = 32
+  	ids := GenerateIDs(workers, n)
+  	if len(ids) != n {
+  		t.Fatalf(\"expected %d ids, got %d\", n, len(ids))
+  	}
+  	seen := make(map[string]struct{}, n)
+  	for _, id := range ids {
+  		if id == \"\" {
+  			t.Fatal(\"got empty id\")
+  		}
+  		if _, dup := seen[id]; dup {
+  			t.Fatalf(\"duplicate id: %q\", id)
+  		}
+  		seen[id] = struct{}{}
+  	}
+  }
+  TEST
+  "
+
+  # Resolve the dependency: populates GOMODCACHE and writes go.sum.
+  workshop exec -- bash -lc 'cd ~/app && go mod tidy'
+
+  # Sanity-check that the external module landed in the cache plug, not
+  # somewhere on a default tmpfs path.
+  workshop exec -- bash -lc 'ls /home/workshop/go/pkg/mod/cache/download/github.com/google/uuid/@v/' \
+    | MATCH "v1\.6\.0\.zip"
+
+  # Run the test suite — must pass.
+  workshop exec -- bash -lc 'cd ~/app && go test ./...' | MATCH "ok\s+example.com/spread-app/parallel"
+
+  # Build the binary into /tmp (avoid polluting the project dir) and run it.
+  workshop exec -- bash -lc 'cd ~/app && go build -o /tmp/spread-app .'
+  workshop exec -- bash -lc 'test -x /tmp/spread-app'
+
+  # The program prints 16 UUIDs, one per line.
+  workshop exec -- bash -lc '/tmp/spread-app | wc -l' | MATCH "^16$"
+
+debug: |
+  workshop exec -- bash -lc 'ls -la /home/workshop/app /home/workshop/app/parallel' || true
+  workshop exec -- bash -lc 'cat /home/workshop/app/go.mod /home/workshop/app/go.sum' || true
+  workshop exec -- bash -lc 'cat /home/workshop/app/main.go' || true
+  workshop exec -- bash -lc 'cat /home/workshop/app/parallel/parallel.go' || true
+  workshop exec -- bash -lc 'go env' || true
