@@ -15,22 +15,20 @@ execute: |
   #   * unit test → exercises `go test`
   #   * built binary → exercises `go build` + linker
   #
-  # Each source file is written via a `bash -c` heredoc inside the
-  # workshop. The heredoc terminator must sit on its own line, so the
-  # closing `"` of the `bash -c` argument is placed on a separate line.
+  # Each source file is streamed into the workshop via stdin so no
+  # in-workshop shell is needed for redirects or heredocs.
 
-  workshop exec -- bash -c "mkdir -p /home/workshop/app/parallel"
+  workshop exec -- mkdir -p /home/workshop/app/parallel
 
-  workshop exec -- bash -c "cat > /home/workshop/app/go.mod <<'MOD'
+  workshop exec -- tee /home/workshop/app/go.mod >/dev/null <<'MOD'
   module example.com/spread-app
 
   go 1.21
 
   require github.com/google/uuid v1.6.0
   MOD
-  "
 
-  workshop exec -- bash -c "cat > /home/workshop/app/main.go <<'MAIN'
+  workshop exec -- tee /home/workshop/app/main.go >/dev/null <<'MAIN'
   package main
 
   import (
@@ -53,9 +51,8 @@ execute: |
   	}
   }
   MAIN
-  "
 
-  workshop exec -- bash -c "cat > /home/workshop/app/parallel/parallel.go <<'PKG'
+  workshop exec -- tee /home/workshop/app/parallel/parallel.go >/dev/null <<'PKG'
   package parallel
 
   import (
@@ -88,9 +85,8 @@ execute: |
   	return results
   }
   PKG
-  "
 
-  workshop exec -- bash -c "cat > /home/workshop/app/parallel/parallel_test.go <<'TEST'
+  workshop exec -- tee /home/workshop/app/parallel/parallel_test.go >/dev/null <<'TEST'
   package parallel
 
   import \"testing\"
@@ -114,29 +110,28 @@ execute: |
   	}
   }
   TEST
-  "
 
   # Resolve the dependency: populates GOMODCACHE and writes go.sum.
-  workshop exec -- bash -lc 'cd ~/app && go mod tidy'
+  workshop exec -w /home/workshop/app -- go mod tidy
 
   # Sanity-check that the external module landed in the cache plug, not
   # somewhere on a default tmpfs path.
-  workshop exec -- bash -lc 'ls /home/workshop/go/pkg/mod/cache/download/github.com/google/uuid/@v/' \
+  workshop exec -- ls /home/workshop/go/pkg/mod/cache/download/github.com/google/uuid/@v/ \
     | MATCH "v1\.6\.0\.zip"
 
   # Run the test suite — must pass.
-  workshop exec -- bash -lc 'cd ~/app && go test ./...' | MATCH "ok\s+example.com/spread-app/parallel"
+  workshop exec -w /home/workshop/app -- go test ./... | MATCH "ok\s+example.com/spread-app/parallel"
 
   # Build the binary into /tmp (avoid polluting the project dir) and run it.
-  workshop exec -- bash -lc 'cd ~/app && go build -o /tmp/spread-app .'
-  workshop exec -- bash -lc 'test -x /tmp/spread-app'
+  workshop exec -w /home/workshop/app -- go build -o /tmp/spread-app .
+  workshop exec -- test -x /tmp/spread-app
 
   # The program prints 16 UUIDs, one per line.
-  workshop exec -- bash -lc '/tmp/spread-app | wc -l' | MATCH "^16$"
+  workshop exec -- /tmp/spread-app | wc -l | MATCH "^\s*16$"
 
 debug: |
-  workshop exec -- bash -lc 'ls -la /home/workshop/app /home/workshop/app/parallel' || true
-  workshop exec -- bash -lc 'cat /home/workshop/app/go.mod /home/workshop/app/go.sum' || true
-  workshop exec -- bash -lc 'cat /home/workshop/app/main.go' || true
-  workshop exec -- bash -lc 'cat /home/workshop/app/parallel/parallel.go' || true
-  workshop exec -- bash -lc 'go env' || true
+  workshop exec -- ls -la /home/workshop/app /home/workshop/app/parallel || true
+  workshop exec -- cat /home/workshop/app/go.mod /home/workshop/app/go.sum || true
+  workshop exec -- cat /home/workshop/app/main.go || true
+  workshop exec -- cat /home/workshop/app/parallel/parallel.go || true
+  workshop exec -- go env || true

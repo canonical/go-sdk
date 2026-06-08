@@ -12,8 +12,8 @@ execute: |
   # downloads survive workshop updates. GOTOOLCHAIN=local stops `go`
   # from silently downloading a newer toolchain when a project's
   # `go.mod` declares a higher version than the one we shipped.
-  workshop exec -- bash -lc 'go env GOMODCACHE' | MATCH "^/home/workshop/go/pkg/mod$"
-  workshop exec -- bash -lc 'go env GOTOOLCHAIN' | MATCH "^local$"
+  workshop exec -- go env GOMODCACHE | MATCH "^/home/workshop/go/pkg/mod$"
+  workshop exec -- go env GOTOOLCHAIN | MATCH "^local$"
 
 debug: |
-  workshop exec -- bash -lc 'go env' || true
+  workshop exec -- go env || true
