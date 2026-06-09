@@ -32,10 +32,10 @@ execute: |
   package main
 
   import (
-  	\"fmt\"
-  	\"os\"
+  	"fmt"
+  	"os"
 
-  	\"example.com/spread-app/parallel\"
+  	"example.com/spread-app/parallel"
   )
 
   func main() {
@@ -43,7 +43,7 @@ execute: |
   	const total = 16
   	ids := parallel.GenerateIDs(workers, total)
   	if len(ids) != total {
-  		fmt.Fprintf(os.Stderr, \"expected %d ids, got %d\n\", total, len(ids))
+  		fmt.Fprintf(os.Stderr, "expected %d ids, got %d\n", total, len(ids))
   		os.Exit(1)
   	}
   	for _, id := range ids {
@@ -56,9 +56,9 @@ execute: |
   package parallel
 
   import (
-  	\"sync\"
+  	"sync"
 
-  	\"github.com/google/uuid\"
+  	"github.com/google/uuid"
   )
 
   func GenerateIDs(workers, n int) []string {
@@ -89,22 +89,22 @@ execute: |
   workshop exec -- tee /home/workshop/app/parallel/parallel_test.go >/dev/null <<'TEST'
   package parallel
 
-  import \"testing\"
+  import "testing"
 
   func TestGenerateIDsAreUnique(t *testing.T) {
   	const workers = 4
   	const n = 32
   	ids := GenerateIDs(workers, n)
   	if len(ids) != n {
-  		t.Fatalf(\"expected %d ids, got %d\", n, len(ids))
+  		t.Fatalf("expected %d ids, got %d", n, len(ids))
   	}
   	seen := make(map[string]struct{}, n)
   	for _, id := range ids {
-  		if id == \"\" {
-  			t.Fatal(\"got empty id\")
+  		if id == "" {
+  			t.Fatal("got empty id")
   		}
   		if _, dup := seen[id]; dup {
-  			t.Fatalf(\"duplicate id: %q\", id)
+  			t.Fatalf("duplicate id: %q", id)
   		}
   		seen[id] = struct{}{}
   	}
