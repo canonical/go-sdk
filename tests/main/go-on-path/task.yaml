@@ -1,0 +1,17 @@
+summary: go is on $PATH inside the workshop
+
+prepare: |
+  envsubst '${BASE}' <workshop.yaml.in >workshop.yaml
+  workshop launch
+
+restore: |
+  workshop remove || true
+
+execute: |
+  # `workshop exec` runs as the `workshop` user with a login shell,
+  # which is what setup-base configures via /etc/profile.d/go.sh.
+  workshop exec -- which go | MATCH "/go$"
+
+debug: |
+  workshop exec -- printenv PATH || true
+  workshop exec -- ls -l /etc/profile.d/go.sh || true
