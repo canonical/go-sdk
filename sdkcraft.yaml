@@ -1,6 +1,6 @@
 name: go
 adopt-info: go
-build-base: ubuntu@24.04
+build-base: ubuntu@26.04
 title: Go SDK
 summary: The Go programming language
 description: |
