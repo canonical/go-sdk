@@ -5,3 +5,7 @@ EOF
 cache=/home/workshop/go/pkg/mod
 sudo -iu workshop -- go env -w GOMODCACHE="$cache"
 sudo -iu workshop -- go env -w GOTOOLCHAIN=local
+
+if ! sudo -iu workshop -- command -v gopls >/dev/null; then
+  sudo -iu workshop -- env GOBIN=/home/workshop/go/bin go install golang.org/x/tools/gopls@latest
+fi
