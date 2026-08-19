@@ -32,6 +32,7 @@ description: |
     `~/go/pkg/mod`.
   - Restores any previously changed Go environment variables.
 license: BSD-3-Clause
+website: https://github.com/canonical/go-sdk
 platforms:
   amd64:
     build-on: [amd64]
