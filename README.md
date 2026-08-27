@@ -1,8 +1,8 @@
 # Go SDK for Workshop
 
 A development environment for Go projects. It provides the official Go toolchain,
-manages module caches via persistent mounts, and preserves Go environment
-settings across workshop updates.
+the Go language server (`gopls`), manages module caches via persistent mounts,
+and preserves Go environment settings across workshop updates.
 
 ---
 
@@ -25,7 +25,8 @@ actions:
     go test ./...
 ```
 
-This demonstrates a basic Go build workflow with persistent module caching.
+This demonstrates a basic Go build workflow with persistent module caching and
+`gopls` available for editor integrations.
 
 ---
 
@@ -40,9 +41,10 @@ This demonstrates a basic Go build workflow with persistent module caching.
    git clone <YOUR_REPO_URL>
    ```
 
-3. On launch, the SDK configures `PATH` and `GOMODCACHE`. No dependency
-   download happens automatically; dependencies are fetched during the first
-   `go build` or `go test`.
+3. On launch, the SDK configures `PATH` and `GOMODCACHE`, then installs `gopls`
+   with the workshop's Go toolchain if it is not already available. No project
+   dependency download happens automatically; project dependencies are fetched
+   during the first `go build`, `go test`, or `gopls` workspace load.
 
 ### Build the project
 
@@ -76,6 +78,17 @@ go run .
 Use standard Go commands; the toolchain behaves exactly as it would in a native
 Go installation.
 
+### Editor integration
+
+The SDK installs `gopls`, the official Go language server, during workshop
+launch. Editors that connect to a workshop can use the `gopls` binary on `PATH`
+without a manual install step:
+
+```bash
+workshop shell
+gopls version
+```
+
 ### Environment configuration
 
 Go environment variables set via `go env -w` persist across workshop updates:
@@ -108,6 +121,7 @@ This SDK doesn't define any slots.
 
 - [Go official documentation](https://go.dev/doc/)
 - [Go modules reference](https://go.dev/ref/mod)
+- [gopls documentation](https://pkg.go.dev/golang.org/x/tools/gopls)
 - [Workshop documentation](https://ubuntu.com/workshop/docs/)
 
 ---

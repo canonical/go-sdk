@@ -4,24 +4,26 @@ build-base: ubuntu@26.04
 title: Go SDK
 summary: The Go programming language
 description: |
-  This SDK provides the official Go toolchain for efficient Go
-  development. Module downloads are persisted on the host to speed up builds
-  across workshop updates, and Go environment settings are preserved between
-  workshop updates.
+  This SDK provides the official Go toolchain for efficient Go development.
+  Module downloads are persisted on the host to speed up builds across workshop
+  updates, and Go environment settings are preserved between workshop updates.
 
   ## Key components
 
   - `go`: The Go programming language toolchain, including the
     compiler, standard library, and all official tools (`gofmt`, `goimports`,
     etc.). The version is determined by the SDK release, not the base image.
+  - `gopls`: The official Go language server for editor integrations,
+    installed on launch with the workshop's Go toolchain.
   - Module cache: Configured to persist at `~/go/pkg/mod` with a bind mount
     to the host, so downloaded dependencies survive workshop updates.
   - Environment preservation: Custom Go environment variables (set via
     `go env -w`) are automatically saved and restored across workshop updates.
 
-  The SDK installs the complete official Go distribution from go.dev. Build tools
-  such as `gcc` are **not** included. If your project requires CGo or needs to
-  compile C dependencies, install the necessary toolchain separately.
+  The SDK installs the complete official Go distribution from go.dev and installs
+  `gopls` from `golang.org/x/tools/gopls` when the workshop is launched. Build
+  tools such as `gcc` are **not** included. If your project requires CGo or needs
+  to compile C dependencies, install the necessary toolchain separately.
 
   ## Setup actions
 
@@ -30,6 +32,8 @@ description: |
   - Adds Go binaries to `PATH` system-wide via `/etc/profile.d/go.sh`.
   - Configures `GOMODCACHE` to point to the persistent mount at
     `~/go/pkg/mod`.
+  - Installs `gopls` into the workshop user's Go bin directory if it is not
+    already available.
   - Restores any previously changed Go environment variables.
 license: BSD-3-Clause
 website: https://github.com/canonical/go-sdk

@@ -12,7 +12,10 @@ execute: |
   workshop exec -- go env GOMODCACHE | MATCH "/home/workshop/go/pkg/mod"
   workshop exec -- go env GOTOOLCHAIN | MATCH "local"
   workshop exec -- which go
+  workshop exec -- which gopls
+  workshop exec -- gopls version | MATCH "golang.org/x/tools/gopls"
 
 debug: |
   workshop exec -- printenv PATH || true
   workshop exec -- go env || true
+  workshop exec -- gopls version || true
