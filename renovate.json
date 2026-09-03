@@ -24,7 +24,8 @@
   "baseBranchPatterns": [
     "1.24",
     "1.25",
-    "1.26"
+    "1.26",
+    "1.27"
   ],
   "packageRules": [
     {
@@ -41,6 +42,11 @@
       "matchPackageNames": ["go"],
       "matchBaseBranches": ["1.26"],
       "allowedVersions": "/^1\\.26\\./"
+    },
+    {
+      "matchPackageNames": ["go"],
+      "matchBaseBranches": ["1.27"],
+      "allowedVersions": "/^1\\.27\\./"
     }
   ]
 }
