@@ -7,15 +7,24 @@
   "enabledManagers": [
     "custom.regex"
   ],
+  "constraintsFiltering": "strict",
   "customManagers": [
     {
       "customType": "regex",
       "managerFilePatterns": ["/^VERSION$/"],
-      "matchStrings": [
-        "(?<currentValue>[0-9.]+)"
-      ],
+      "matchStrings": ["(?<currentValue>[0-9.]+)"],
       "depNameTemplate": "go",
       "datasourceTemplate": "golang-version",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^sdkcraft\\.yaml$/"],
+      "matchStrings": [
+        "GOPLS_VERSION_GO_(?<depType>[0-9.]+):\\s*(?<currentValue>v[0-9.]+)"
+      ],
+      "depNameTemplate": "golang.org/x/tools/gopls",
+      "datasourceTemplate": "go",
       "versioningTemplate": "semver"
     }
   ],
@@ -47,6 +56,39 @@
       "matchPackageNames": ["go"],
       "matchBaseBranches": ["1.27"],
       "allowedVersions": "/^1\\.27\\./"
+    },
+    {
+      "description": "gopls is rebuilt per Go track. Each track updates only its own matrix entry, filtered by constraintsFiltering to gopls releases that still support the track's Go: a gopls whose go.mod go directive is minor D supports Go {D-1, D}, so %goMod is set to N+1 for track 1.N (accept D <= N+1, reject D >= N+2).",
+      "matchPackageNames": ["golang.org/x/tools/gopls"],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["golang.org/x/tools/gopls"],
+      "matchBaseBranches": ["1.24"],
+      "matchDepTypes": ["1.24"],
+      "constraints": { "%goMod": "1.25" },
+      "enabled": true
+    },
+    {
+      "matchPackageNames": ["golang.org/x/tools/gopls"],
+      "matchBaseBranches": ["1.25"],
+      "matchDepTypes": ["1.25"],
+      "constraints": { "%goMod": "1.26" },
+      "enabled": true
+    },
+    {
+      "matchPackageNames": ["golang.org/x/tools/gopls"],
+      "matchBaseBranches": ["1.26"],
+      "matchDepTypes": ["1.26"],
+      "constraints": { "%goMod": "1.27" },
+      "enabled": true
+    },
+    {
+      "matchPackageNames": ["golang.org/x/tools/gopls"],
+      "matchBaseBranches": ["1.27"],
+      "matchDepTypes": ["1.27"],
+      "constraints": { "%goMod": "1.28" },
+      "enabled": true
     }
   ]
 }
