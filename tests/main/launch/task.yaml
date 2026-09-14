@@ -18,7 +18,7 @@ execute: |
   workshop exec -w /tmp/gopls-smoke -- go mod init example.com/gopls-smoke
   workshop exec -w /tmp/gopls-smoke -- sh -ec 'v=$(go env GOVERSION | sed -E "s/^go([0-9]+\.[0-9]+).*/\1/"); go mod edit -go="$v"'
   workshop exec -- cp /project/gopls-smoke/main.go /tmp/gopls-smoke/main.go
-  workshop exec -w /tmp/gopls-smoke -- gopls check ./...
+  workshop exec -w /tmp/gopls-smoke -- gopls check main.go
 
 debug: |
   workshop exec -- printenv PATH || true
