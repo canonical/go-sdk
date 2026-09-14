@@ -4,4 +4,10 @@ EOF
 
 cache=/home/workshop/go/pkg/mod
 sudo -iu workshop -- go env -w GOMODCACHE="$cache"
+
+if [[ "$(dpkg --print-architecture)" == riscv64 ]]; then
+gopls_version=$(cat "$SDK/share/gopls-version")
+sudo -iu workshop -- env GOTOOLCHAIN=auto go install "golang.org/x/tools/gopls@${gopls_version}"
+fi
+
 sudo -iu workshop -- go env -w GOTOOLCHAIN=local

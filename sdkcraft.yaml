@@ -15,14 +15,15 @@ description: |
     etc.). The version is determined by the SDK release, not the base image.
   - `gopls`: The official Go language server for editor integrations,
     built for the SDK's target architecture, tracking the latest gopls that
-    supports the SDK's Go release.
+    supports the SDK's Go release. On RISC-V, the pinned version is installed
+    when the workshop launches instead.
   - Module cache: Configured to persist at `~/go/pkg/mod` with a bind mount
     to the host, so downloaded dependencies survive workshop updates.
   - Environment preservation: Custom Go environment variables (set via
     `go env -w`) are automatically saved and restored across workshop updates.
 
   The SDK installs the complete official Go distribution from go.dev and a pinned
-  `gopls` build from `golang.org/x/tools/gopls`. Build tools such as `gcc` are
+  `gopls` version from `golang.org/x/tools/gopls`. Build tools such as `gcc` are
   **not** included. If your project requires CGo or needs to compile C
   dependencies, install the necessary toolchain separately.
 
@@ -42,7 +43,7 @@ platforms:
     build-on: [amd64]
     build-for: [amd64]
   arm64:
-    build-on: [amd64]
+    build-on: [arm64]
     build-for: [arm64]
   riscv64:
     build-on: [amd64]
@@ -78,6 +79,11 @@ parts:
         echo "No gopls version configured for Go ${GO_VERSION}" >&2
         exit 1
       fi
+      if [[ "$CRAFT_ARCH_BUILD_FOR" == riscv64 ]]; then
+        install -Dm644 /dev/null "$CRAFT_PART_INSTALL/share/gopls-version"
+        printf '%s\n' "$GOPLS_VERSION" >"$CRAFT_PART_INSTALL/share/gopls-version"
+        exit 0
+      fi
       export GOPATH="$CRAFT_PART_BUILD/gopath"
       # gopls may require a newer Go than the SDK ships; let Go fetch that toolchain to build it.
       CGO_ENABLED=0 \
@@ -85,9 +91,4 @@ parts:
         GOOS=linux \
         GOTOOLCHAIN=auto \
         "$CRAFT_STAGE/bin/go" install "golang.org/x/tools/gopls@${GOPLS_VERSION}"
-      if [[ "$CRAFT_ARCH_BUILD_FOR" == amd64 ]]; then
-        gopls="$GOPATH/bin/gopls"
-      else
-        gopls="$GOPATH/bin/linux_${CRAFT_ARCH_BUILD_FOR}/gopls"
-      fi
-      install -Dm755 "$gopls" "$CRAFT_PART_INSTALL/bin/gopls"
+      install -Dm755 "$GOPATH/bin/gopls" "$CRAFT_PART_INSTALL/bin/gopls"
