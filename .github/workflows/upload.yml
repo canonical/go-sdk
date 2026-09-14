@@ -18,8 +18,17 @@ concurrency:
 jobs:
   build-and-upload:
     uses: canonical/sdkcraft-actions/.github/workflows/upload.yml@main
+    strategy:
+      matrix:
+        include:
+          - platforms: [amd64]
+            runs-on: [self-hosted, linux, jammy, x64, xlarge]
+          - platforms: [arm64]
+            runs-on: [self-hosted, linux, jammy, ARM64, xlarge]
     with:
-      platforms: '["amd64","arm64","riscv64"]'
+      runs-on: ${{ toJSON(matrix.runs-on) }}
+      platforms: ${{ toJSON(matrix.platforms) }}
+      platform-flag: "--platform"
       risk: "stable"
     secrets:
       SDKCRAFT_STORE_CREDENTIALS: ${{ secrets.SDKCRAFT_STORE_CREDENTIALS_PROD }}
