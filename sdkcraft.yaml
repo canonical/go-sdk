@@ -72,7 +72,7 @@ parts:
       GOPLS_VERSION_GO_1.24: v0.21.1
       GOPLS_VERSION_GO_1.25: v0.23.0
       GOPLS_VERSION_GO_1.26: v0.23.0
-      GOPLS_VERSION_GO_1.27: v0.23.0
+      GOPLS_VERSION_GO_1.27: v0.24.0
       EOF
       )
       if [[ -z "$GOPLS_VERSION" ]]; then
